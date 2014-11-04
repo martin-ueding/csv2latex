@@ -14,12 +14,21 @@ import csv
 def main():
     options = _parse_args()
 
+    rows = []
     output = []
 
     with open(options.input) as f:
-        reader = csv.reader(f)
-        for row in reader:
-            output.append(options.linestart + ' & '.join(row) + options.lineend + r' \\')
+        if options.split:
+            for line in f:
+                line = line.strip()
+                rows.append(line.split())
+        else:
+            reader = csv.reader(f)
+            for row in reader:
+                rows.append(row)
+
+    for row in rows:
+        output.append(options.linestart + ' & '.join(row) + options.lineend + r' \\')
 
     with open(options.output, 'w') as f:
         f.write('\n'.join(output))
@@ -38,7 +47,8 @@ def _parse_args():
     parser.add_argument('output', help='Output TeX file')
     parser.add_argument('--linestart', default='', help='Prepend to each line')
     parser.add_argument('--lineend', default='', help='Append to each line')
-    parser.add_argument('--delimiter', default=' ', help='Field delimiter')
+    parser.add_argument('--delimiter', default=' ', help='Field delimiter in CSV mode')
+    parser.add_argument('--split', action='store_true', help='Just split at the given token')
 
     return parser.parse_args()
 
